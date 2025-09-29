@@ -1,8 +1,1 @@
 blank_issues_enabled: false
-contact_links:
-  - name: ?? HypeRate API Documentation
-    url: https://www.hyperate.io/api
-    about: Official HypeRate API documentation and guides
-  - name: ?? Email Support
-    url: mailto:serpensin@serpensin.com
-    about: Contact the maintainer directly for urgent issues or questions
