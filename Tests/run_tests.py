@@ -89,16 +89,40 @@ def run_real_integration_tests(token: str = None) -> bool:
         )
         return True  # Not a failure, just skipped
 
+    # Set the token as an environment variable for the test
+    env = os.environ.copy()
+    env["HYPERATE_API_TOKEN"] = token
+    
     cmd = [
         "python",
         "-m",
         "pytest",
         "Tests/test_real_integration.py",
-        f"--token={token}",
         "-v",
         "-s",
     ]
-    return run_command(cmd, "Real Integration Tests")
+    
+    print(f"\n{'='*60}")
+    print(f"Running: Real Integration Tests")
+    print(f"Command: {' '.join(cmd)}")
+    print(f"Token: {token[:8]}..." if token else "No token")
+    print(f"{'='*60}")
+
+    start_time = time.time()
+    try:
+        # Change to project root directory for running commands
+        project_root = get_project_root()
+        result = subprocess.run(cmd, check=True, capture_output=False, cwd=project_root, env=env)
+        end_time = time.time()
+        print(
+            f"\n✅ Real Integration Tests completed successfully in {end_time - start_time:.2f}s"
+        )
+        return True
+    except subprocess.CalledProcessError as e:
+        end_time = time.time()
+        print(f"\n❌ Real Integration Tests failed after {end_time - start_time:.2f}s")
+        print(f"Exit code: {e.returncode}")
+        return False
 
 
 def run_performance_tests() -> bool:
