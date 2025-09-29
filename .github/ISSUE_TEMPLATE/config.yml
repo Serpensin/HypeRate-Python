@@ -1,11 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: ?? General Discussion
-    url: https://github.com/Serpensin/HypeRate-Python/discussions
-    about: Ask questions and discuss with community members
   - name: ?? HypeRate API Documentation
     url: https://www.hyperate.io/api
-    about: Official HypeRate API documentation
-  - name: ?? Feature Ideas Discussion
-    url: https://github.com/Serpensin/HypeRate-Python/discussions/categories/ideas
-    about: Share and discuss new feature ideas with the community
+    about: Official HypeRate API documentation and guides
+  - name: ?? Email Support
+    url: mailto:serpensin@serpensin.com
+    about: Contact the maintainer directly for urgent issues or questions

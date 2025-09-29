@@ -10,7 +10,7 @@ body:
       value: |
         Thanks for your question! Please provide as much context as possible to help us give you a helpful answer.
         
-        **Note:** For general discussions and community help, consider using [GitHub Discussions](https://github.com/Serpensin/HypeRate-Python/discussions) instead.
+        **Note:** For urgent questions, you can contact the maintainer directly at [serpensin@serpensin.com](mailto:serpensin@serpensin.com).
 
   - type: dropdown
     id: question-type
@@ -94,7 +94,7 @@ body:
       label: ? Checklist
       description: Please confirm you have completed the following
       options:
-        - label: I have searched existing issues and discussions
+        - label: I have searched existing issues for similar questions
           required: true
         - label: I have checked the README and documentation
           required: true

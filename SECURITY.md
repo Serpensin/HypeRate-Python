@@ -25,7 +25,7 @@ Instead, please report them responsibly by using one of the following methods:
 
 ### 📧 Email Reporting
 
-Send an email to: **[serpensin@protonmail.com](mailto:serpensin@protonmail.com)**
+Send an email to: **[serpensin@serpensin.com](mailto:serpensin@serpensin.com)**
 
 Include the word "SECURITY" in the subject line and provide:
 - A description of the vulnerability
@@ -126,7 +126,7 @@ We appreciate the efforts of security researchers and will acknowledge your cont
 
 For any questions about this security policy, please contact:
 
-- **Email**: [serpensin@protonmail.com](mailto:serpensin@protonmail.com)
+- **Email**: [serpensin@serpensin.com](mailto:serpensin@serpensin.com)
 - **GitHub**: [@Serpensin](https://github.com/Serpensin)
 
 ---
