@@ -1,4 +1,4 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
@@ -6,8 +6,8 @@ We provide security updates for the following versions of HypeRate Python:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | ? Yes             |
-| < 1.0   | ? No              |
+| 1.0.x   | ✅ Yes             |
+| < 1.0   | ❌ No              |
 
 ## Reporting a Vulnerability
 
@@ -17,13 +17,13 @@ We take the security of HypeRate Python seriously. If you believe you have found
 
 Instead, please report them responsibly by using one of the following methods:
 
-### ?? Private Security Reporting (Preferred)
+### 🔒 Private Security Reporting (Preferred)
 
 1. Go to the **Security** tab in the [HypeRate Python repository](https://github.com/Serpensin/HypeRate-Python)
 2. Click on **"Report a vulnerability"**
 3. Fill out the security advisory form with as much detail as possible
 
-### ?? Email Reporting
+### 📧 Email Reporting
 
 Send an email to: **[serpensin@protonmail.com](mailto:serpensin@protonmail.com)**
 
@@ -131,4 +131,4 @@ For any questions about this security policy, please contact:
 
 ---
 
-Thank you for helping keep HypeRate Python secure! ??
+Thank you for helping keep HypeRate Python secure! 🔒
