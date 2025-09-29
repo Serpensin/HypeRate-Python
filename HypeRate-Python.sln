@@ -1,0 +1,49 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Example", "Example\Example.pyproj", "{58A229FF-3A2B-41FB-A438-EDCE9D8DB731}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+		setup.py = setup.py
+	EndProjectSection
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "lib", "lib\lib.pyproj", "{16B51A01-01E1-4AB0-B20C-0ECC0AF8E783}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\mypy.yml = .github\workflows\mypy.yml
+		.github\workflows\publish-pypi.yml = .github\workflows\publish-pypi.yml
+		.github\workflows\pylint.yml = .github\workflows\pylint.yml
+		.github\workflows\tests.yml = .github\workflows\tests.yml
+	EndProjectSection
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Tests", "Tests\Tests.pyproj", "{F0E69FD3-C1D0-42ED-A4D3-2642D0B05534}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58A229FF-3A2B-41FB-A438-EDCE9D8DB731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58A229FF-3A2B-41FB-A438-EDCE9D8DB731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16B51A01-01E1-4AB0-B20C-0ECC0AF8E783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16B51A01-01E1-4AB0-B20C-0ECC0AF8E783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0E69FD3-C1D0-42ED-A4D3-2642D0B05534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0E69FD3-C1D0-42ED-A4D3-2642D0B05534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC7C823A-2526-4791-A401-81FC6E30D49B}
+	EndGlobalSection
+EndGlobal

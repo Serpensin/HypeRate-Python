@@ -1,0 +1,50 @@
+name: PyLint Code Quality
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install pylint
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
+
+    - name: Install package in development mode
+      run: |
+        python -m pip install -e .
+
+    - name: Run PyLint on lib directory
+      run: |
+        python -m pylint lib/hyperate/ --output-format=text --score=yes --fail-under=10.0
+
+    - name: Generate PyLint report
+      if: always()
+      run: |
+        python -m pylint lib/hyperate/ --output-format=json --reports=yes > pylint-report-${{ matrix.python-version }}.json || true
+
+    - name: Upload PyLint report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pylint-report-${{ matrix.python-version }}
+        path: pylint-report-${{ matrix.python-version }}.json
