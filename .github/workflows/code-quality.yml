@@ -84,13 +84,3 @@ jobs:
       with:
         name: flake8-report-${{ matrix.python-version }}
         path: flake8-report-${{ matrix.python-version }}.json
-
-    - name: Code Quality Summary
-      if: always()
-      run: |
-        echo "## Code Quality Check Results" >> $GITHUB_STEP_SUMMARY
-        echo "| Tool | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| PyLint | ? Must score 10.0/10.0 |" >> $GITHUB_STEP_SUMMARY
-        echo "| Mypy | ? Must pass strict mode |" >> $GITHUB_STEP_SUMMARY
-        echo "| Flake8 | ? Must pass style checks |" >> $GITHUB_STEP_SUMMARY
