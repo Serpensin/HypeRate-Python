@@ -35,16 +35,119 @@ def get_token_from_input() -> Optional[str]:
         return None
 
 
+def validate_pytest_args(args: list) -> list:
+    """Validate and sanitize pytest arguments to prevent command injection."""
+    if not args:
+        return []
+
+    # Allowed pytest argument patterns
+    allowed_patterns = [
+        # Test selection
+        "-k",
+        "--tb",
+        "-v",
+        "--verbose",
+        "-q",
+        "--quiet",
+        "--maxfail",
+        "--count",
+        "--durations",
+        "--lf",
+        "--ff",
+        # Coverage
+        "--cov",
+        "--cov-report",
+        "--cov-branch",
+        # Output control
+        "-s",
+        "--capture",
+        "--show-capture",
+        # Markers
+        "-m",
+        "--markers",
+        # Collection
+        "--collect-only",
+        "--co",
+        # Warnings
+        "--disable-warnings",
+        "-W",
+        # Exit codes
+        "--tb=short",
+        "--tb=long",
+        "--tb=no",
+        "--tb=line",
+    ]
+
+    # Additional patterns that are safe (test file patterns, simple flags)
+    safe_patterns = [
+        # Simple flags (start with - or --)
+        lambda x: x.startswith("-") and not any(
+            c in x for c in ["&", "|", ";", "`", "$", "(", ")", ":"]
+        ),
+        # Test name patterns (for -k option values)
+        lambda x: x.replace("_", "").replace("-", "").isalnum(),
+        # Test file paths
+        lambda x: x.endswith(".py") and "/" not in x and "\\" not in x,
+        # Simple alphanumeric values
+        lambda x: x.isalnum(),
+    ]
+
+    validated_args = []
+    skip_next = False
+
+    for i, arg in enumerate(args):
+        if skip_next:
+            skip_next = False
+            continue
+
+        # Check if it's a known safe argument
+        if arg in allowed_patterns:
+            validated_args.append(arg)
+            continue
+
+        # Check if it's a combined argument (like --tb=short)
+        if "=" in arg:
+            key, value = arg.split("=", 1)
+            if key in allowed_patterns and any(pattern(value) for pattern in safe_patterns):
+                validated_args.append(arg)
+                continue
+
+        # Check if it's a flag followed by a value
+        if arg.startswith("-") and i + 1 < len(args):
+            if arg in ["-k", "-m", "--maxfail", "--durations", "--count"]:
+                next_arg = args[i + 1]
+                if any(pattern(next_arg) for pattern in safe_patterns):
+                    validated_args.extend([arg, next_arg])
+                    skip_next = True
+                    continue
+
+        # Check if it's a simple safe pattern
+        if any(pattern(arg) for pattern in safe_patterns):
+            validated_args.append(arg)
+            continue
+
+        # If we get here, the argument is not recognized as safe
+        print(f"Warning: Skipping potentially unsafe argument: {arg}")
+
+    return validated_args
+
+
 def run_tests_with_token(token: str, extra_args: list = None) -> int:
     """Run the real integration tests with the provided token."""
     if extra_args is None:
         extra_args = []
 
+    # Validate and sanitize extra arguments to prevent command injection
+    safe_extra_args = validate_pytest_args(extra_args)
+
+    if len(safe_extra_args) != len(extra_args):
+        print("Some command line arguments were filtered for security reasons.")
+
     # Set environment variable
     env = os.environ.copy()
     env["HYPERATE_API_TOKEN"] = token
 
-    # Build pytest command
+    # Build pytest command with validated arguments
     cmd = [
         sys.executable,
         "-m",
@@ -52,9 +155,11 @@ def run_tests_with_token(token: str, extra_args: list = None) -> int:
         "Tests/test_real_integration.py",
         "-v",
         "--tb=short",
-    ] + extra_args
+    ] + safe_extra_args
 
-    print(f"Running: {' '.join(cmd[:-1])} --token=***")
+    # Safe display of command (don't show actual token)
+    display_cmd = cmd[:-len(safe_extra_args)] + safe_extra_args if safe_extra_args else cmd
+    print(f"Running: {' '.join(display_cmd[:-1])} --token=***")
     print(f"Using token: {token[:8]}...")
     print()
 
