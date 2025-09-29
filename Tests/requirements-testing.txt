@@ -1,0 +1,30 @@
+# Test dependencies for HypeRate library
+# Install with: pip install -r requirements-testing.txt
+
+# Core testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-benchmark>=4.0.0
+
+# Additional testing utilities
+coverage>=7.0.0
+mock>=4.0.0
+
+# Performance monitoring (optional)
+psutil>=5.9.0
+memory-profiler>=0.60.0
+
+# Code quality tools (already installed but listed for completeness)
+pylint>=3.0.0
+mypy>=1.0.0
+flake8>=6.0.0
+
+# WebSocket testing
+websockets>=11.0.0
+
+# Development dependencies
+tox>=4.0.0
+pytest-html>=3.1.0
+pytest-xdist>=3.0.0

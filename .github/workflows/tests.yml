@@ -1,0 +1,86 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r Tests/requirements-testing.txt
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Install package in development mode
+      run: |
+        python -m pip install -e .
+
+    - name: Run unit tests
+      run: |
+        python -m pytest Tests/test_hyperate.py -v --tb=short
+
+    - name: Run integration tests
+      run: |
+        python -m pytest Tests/test_mocked_scenarios.py Tests/test_mocked_simple.py -v --tb=short
+
+    - name: Run performance tests
+      run: |
+        python -m pytest Tests/test_performance.py -v --tb=short -s
+
+    - name: Run real integration tests
+      env:
+        HYPERATE_API_TOKEN: ${{ secrets.HYPERATE_API_TOKEN }}
+      if: env.HYPERATE_API_TOKEN != ''
+      run: |
+        python -m pytest Tests/test_real_integration.py --token="${HYPERATE_API_TOKEN}" -v --tb=short
+
+    - name: Run all tests with coverage
+      env:
+        HYPERATE_API_TOKEN: ${{ secrets.HYPERATE_API_TOKEN }}
+      run: |
+        if [ -n "${HYPERATE_API_TOKEN}" ]; then
+          echo "Running all tests including real integration tests with coverage"
+          python -m pytest Tests/ --cov=lib.hyperate --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=85 -v
+        else
+          echo "Running tests excluding real integration tests (no API token available)"
+          python -m pytest Tests/ --ignore=Tests/test_real_integration.py --cov=lib.hyperate --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=85 -v
+        fi
+
+    - name: Upload coverage reports to Codecov
+      if: matrix.python-version == '3.12'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage report artifact
+      if: matrix.python-version == '3.12'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-html
+        path: htmlcov/
+
+    - name: Run benchmark tests (if available)
+      continue-on-error: true
+      run: |
+        python -m pytest Tests/test_benchmarks.py --benchmark-only --benchmark-sort=mean -v || python -m pytest Tests/test_performance.py --benchmark-only --benchmark-sort=mean -v || echo "Benchmark tests failed or not available"

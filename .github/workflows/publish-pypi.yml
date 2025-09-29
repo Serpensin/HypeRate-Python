@@ -1,0 +1,188 @@
+﻿name: Publish Python 🐍 distribution to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.2.3)'
+        required: true
+
+jobs:
+  wait-for-ci-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manual dispatch version
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('Validating manual dispatch version...');
+
+            // Get the latest release
+            const { data: latestRelease } = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const releaseTag = latestRelease.tag_name;
+            const inputVersion = '${{ github.event.inputs.version }}';
+
+            // Normalize versions by removing 'v' or 'V' prefix if present
+            const normalizeVersion = (version) => {
+              return version.replace(/^[vV]/, '');
+            };
+
+            const normalizedReleaseVersion = normalizeVersion(releaseTag);
+            const normalizedInputVersion = normalizeVersion(inputVersion);
+
+            console.log(`Latest release tag: ${releaseTag} (normalized: ${normalizedReleaseVersion})`);
+            console.log(`Manual input version: ${inputVersion} (normalized: ${normalizedInputVersion})`);
+
+            if (normalizedReleaseVersion !== normalizedInputVersion) {
+              core.setFailed(
+                `Version mismatch! Manual input version '${inputVersion}' does not match ` +
+                `the latest release tag '${releaseTag}'. Please ensure you're publishing ` +
+                `the correct version that corresponds to an existing release.`
+              );
+              return;
+            }
+
+            console.log('✅ Version validation passed! Input version matches latest release.');
+
+      - name: Wait for required CI workflows to complete
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requiredWorkflows = ['Test Suite', 'PyLint Code Quality', 'Mypy Type Checking'];
+            const maxWaitTime = 30 * 60 * 1000; // 30 minutes
+            const pollInterval = 30 * 1000; // 30 seconds
+            const startTime = Date.now();
+
+            console.log('Waiting for required CI workflows to complete on master branch...');
+            console.log('Required workflows:', requiredWorkflows);
+
+            while (Date.now() - startTime < maxWaitTime) {
+              // Get recent workflow runs for master branch
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'master',
+                per_page: 50
+              });
+
+              // Find the latest run for each required workflow
+              const latestRuns = {};
+              for (const run of workflowRuns.workflow_runs) {
+                const workflowName = run.name;
+                if (requiredWorkflows.includes(workflowName)) {
+                  if (!latestRuns[workflowName] || run.created_at > latestRuns[workflowName].created_at) {
+                    latestRuns[workflowName] = run;
+                  }
+                }
+              }
+
+              console.log('Latest workflow runs found:');
+              for (const [name, run] of Object.entries(latestRuns)) {
+                console.log(`  ${name}: ${run.status} (${run.conclusion || 'running'}) - ${run.html_url}`);
+              }
+
+              // Check if we found runs for all required workflows
+              const missingWorkflows = requiredWorkflows.filter(name => !latestRuns[name]);
+              if (missingWorkflows.length > 0) {
+                console.log(`⚠️  Missing workflow runs for: ${missingWorkflows.join(', ')}`);
+                console.log(`Waiting ${pollInterval/1000}s before next check...`);
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+                continue;
+              }
+
+              // Check if all required workflows have completed
+              const allCompleted = requiredWorkflows.every(name => {
+                const run = latestRuns[name];
+                return run && run.status === 'completed';
+              });
+
+              if (allCompleted) {
+                // Check if all completed successfully
+                const allSuccessful = requiredWorkflows.every(name => {
+                  const run = latestRuns[name];
+                  return run && run.conclusion === 'success';
+                });
+
+                if (allSuccessful) {
+                  console.log('✅ All required CI workflows have completed successfully!');
+                  break;
+                } else {
+                  console.log('❌ Some required CI workflows failed');
+                  const failedWorkflows = requiredWorkflows.filter(name => {
+                    const run = latestRuns[name];
+                    return !run || run.conclusion !== 'success';
+                  });
+                  core.setFailed(`The following required workflows failed: ${failedWorkflows.join(', ')}`);
+                  return;
+                }
+              }
+
+              // Wait before next poll
+              console.log(`Some workflows still running. Waiting ${pollInterval/1000}s before next check...`);
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+            }
+
+            // Timeout check
+            if (Date.now() - startTime >= maxWaitTime) {
+              core.setFailed('Timed out waiting for CI workflows to complete');
+              return;
+            }
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Set version in setup.py
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF##*/}"
+            VERSION="${VERSION#v}"
+            VERSION="${VERSION#V}"
+          fi
+          echo "Using version: $VERSION"
+          sed -i "s/version=\"[^\"]*\"/version=\"$VERSION\"/" setup.py
+          echo "Updated setup.py version to: $VERSION"
+
+      - name: Verify setup.py
+        run: |
+          echo "=== Current setup.py version line ==="
+          grep "version=" setup.py
+          echo "=== Python version requirement ==="
+          grep "python_requires=" setup.py
+
+      - name: Build package
+        run: |
+          python -m build
+
+      - name: Verify build
+        run: |
+          echo "=== Built packages ==="
+          ls -la dist/
+          echo "=== Package metadata ==="
+          python -m twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        env:
+          TWINE_NON_INTERACTIVE: 1
