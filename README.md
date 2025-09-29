@@ -1,7 +1,6 @@
 ﻿# Official HypeRate Python Bindings
 
-[![PyLint Code Quality](https://github.com/Serpensin/HypeRate-Python/workflows/PyLint%20Code%20Quality/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/pylint.yml)
-[![Mypy Type Checking](https://github.com/Serpensin/HypeRate-Python/workflows/Mypy%20Type%20Checking/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/mypy.yml)
+[![Code Quality](https://github.com/Serpensin/HypeRate-Python/workflows/Code%20Quality/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/code-quality.yml)
 [![Test Suite](https://github.com/Serpensin/HypeRate-Python/workflows/Test%20Suite/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/Serpensin/HypeRate-Python/branch/master/graph/badge.svg)](https://codecov.io/gh/Serpensin/HypeRate-Python)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/Serpensin/HypeRate-Python)
@@ -199,8 +198,7 @@ python Tests/run_tests.py --real-integration --token=your_actual_api_token_here
 
 This project maintains high code quality standards:
 
-- **PyLint**: Code quality and style checking (target score ≥ 10.0)
-- **Mypy**: Static type checking with strict mode
+- **Code Quality Checks**: PyLint (10.0/10.0), Mypy (strict mode), and Flake8 style checking
 - **Test Coverage**: Minimum 85% code coverage required
 - **Comprehensive Testing**: Unit, integration, and performance tests
 
