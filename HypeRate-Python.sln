@@ -16,6 +16,7 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "lib", "lib\lib.pyproj", "{1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\code-quality.yml = .github\workflows\code-quality.yml
 		.github\workflows\mypy.yml = .github\workflows\mypy.yml
 		.github\workflows\publish-pypi.yml = .github\workflows\publish-pypi.yml
 		.github\workflows\pylint.yml = .github\workflows\pylint.yml

@@ -1,5 +1,5 @@
 # Test dependencies for HypeRate library
-# Install with: pip install -r requirements.txt
+# Install with: pip install -r requirements-testing.txt
 
 # Core testing framework
 pytest>=7.0.0

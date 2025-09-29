@@ -13,16 +13,16 @@ Examples:
     python run_tests.py --all                             # Run all tests
     python run_tests.py --unit                            # Run only unit tests
     python run_tests.py --integration                     # Run only integration tests
-    python run_tests.py --real-integration --token=TOKEN # Run real API integration tests
+    python run_tests.py --real-integration --token=TOKEN  # Run real API integration tests
     python run_tests.py --performance                     # Run only performance tests
     python run_tests.py --coverage                        # Run tests with coverage
     python run_tests.py --benchmark                       # Run benchmark tests
     python run_tests.py --parallel                        # Run tests in parallel
 """
 import argparse
-import sys
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -49,7 +49,9 @@ def run_command(cmd: list, description: str) -> bool:
         project_root = get_project_root()
         result = subprocess.run(cmd, check=True, capture_output=False, cwd=project_root)
         end_time = time.time()
-        print(f"\n✅ {description} completed successfully in {end_time - start_time:.2f}s")
+        print(
+            f"\n✅ {description} completed successfully in {end_time - start_time:.2f}s"
+        )
         return True
     except subprocess.CalledProcessError as e:
         end_time = time.time()
@@ -66,7 +68,14 @@ def run_unit_tests() -> bool:
 
 def run_integration_tests() -> bool:
     """Run integration tests."""
-    cmd = ["python", "-m", "pytest", "Tests/test_mocked_scenarios.py", "Tests/test_mocked_simple.py", "-v"]
+    cmd = [
+        "python",
+        "-m",
+        "pytest",
+        "Tests/test_mocked_scenarios.py",
+        "Tests/test_mocked_simple.py",
+        "-v",
+    ]
     return run_command(cmd, "Mocked Scenario Tests")
 
 
@@ -75,10 +84,20 @@ def run_real_integration_tests(token: str = None) -> bool:
     if not token:
         print("\n⚠️  Skipping real integration tests - no API token provided")
         print("To run real integration tests:")
-        print("  python Tests/run_tests.py --real-integration --token=your_actual_api_token")
+        print(
+            "  python Tests/run_tests.py --real-integration --token=your_actual_api_token"
+        )
         return True  # Not a failure, just skipped
 
-    cmd = ["python", "-m", "pytest", "Tests/test_real_integration.py", f"--token={token}", "-v", "-s"]
+    cmd = [
+        "python",
+        "-m",
+        "pytest",
+        "Tests/test_real_integration.py",
+        f"--token={token}",
+        "-v",
+        "-s",
+    ]
     return run_command(cmd, "Real Integration Tests")
 
 
@@ -97,14 +116,16 @@ def run_all_tests() -> bool:
 def run_tests_with_coverage() -> bool:
     """Run tests with coverage reporting."""
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "Tests/",
         "--cov=lib.hyperate",
         "--cov-report=html",
         "--cov-report=term-missing",
         "--cov-report=xml",
         "--cov-fail-under=85",
-        "-v"
+        "-v",
     ]
     return run_command(cmd, "Tests with Coverage")
 
@@ -112,12 +133,14 @@ def run_tests_with_coverage() -> bool:
 def run_benchmark_tests() -> bool:
     """Run benchmark tests."""
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "Tests/test_performance.py",
         "--benchmark-only",
         "--benchmark-sort=mean",
         "--benchmark-compare-fail=mean:5%",
-        "-v"
+        "-v",
     ]
     return run_command(cmd, "Benchmark Tests")
 
@@ -125,11 +148,14 @@ def run_benchmark_tests() -> bool:
 def run_parallel_tests() -> bool:
     """Run tests in parallel."""
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "Tests/",
-        "-n", "auto",  # Use all available CPUs
+        "-n",
+        "auto",  # Use all available CPUs
         "--dist=loadscope",
-        "-v"
+        "-v",
     ]
     return run_command(cmd, "Parallel Tests")
 
@@ -137,9 +163,12 @@ def run_parallel_tests() -> bool:
 def run_stress_tests() -> bool:
     """Run stress tests specifically."""
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "Tests/test_performance.py::TestStressTests",
-        "-v", "-s"
+        "-v",
+        "-s",
     ]
     return run_command(cmd, "Stress Tests")
 
@@ -149,7 +178,7 @@ def run_linting() -> bool:
     success = True
 
     # PyLint
-    cmd = ["python", "-m", "pylint", "lib/hyperate/", "--output-format=text"]
+    cmd = ["python", "-m", "pylint", "lib/hyperate/", "--output-format=text", "--fail-under=10.0"]
     success &= run_command(cmd, "PyLint Check")
 
     # Mypy
@@ -157,7 +186,7 @@ def run_linting() -> bool:
     success &= run_command(cmd, "Mypy Type Check")
 
     # Flake8
-    cmd = ["python", "-m", "flake8", "lib/hyperate/", "--max-line-length=100"]
+    cmd = ["python", "-m", "flake8", "lib/hyperate/"]
     success &= run_command(cmd, "Flake8 Style Check")
 
     return success
@@ -166,14 +195,16 @@ def run_linting() -> bool:
 def generate_test_report() -> bool:
     """Generate comprehensive test report."""
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "Tests/",
         "--cov=lib.hyperate",
         "--cov-report=html",
         "--html=report.html",
         "--self-contained-html",
         "--junit-xml=test-results.xml",
-        "-v"
+        "-v",
     ]
     return run_command(cmd, "Test Report Generation")
 
@@ -183,8 +214,12 @@ def check_test_dependencies() -> bool:
     print("Checking test dependencies...")
 
     required_packages = [
-        "pytest", "pytest-asyncio", "pytest-cov",
-        "websockets", "pylint", "mypy"
+        "pytest",
+        "pytest-asyncio",
+        "pytest-cov",
+        "websockets",
+        "pylint",
+        "mypy",
     ]
 
     missing_packages = []
@@ -222,27 +257,47 @@ Examples:
   python run_tests.py --stress                          # Run stress tests
   python run_tests.py --lint                            # Run code quality checks
   python run_tests.py --report                          # Generate test report
-        """
+        """,
     )
 
     # Test type options
     test_group = parser.add_mutually_exclusive_group()
     test_group.add_argument("--all", action="store_true", help="Run all tests")
     test_group.add_argument("--unit", action="store_true", help="Run unit tests only")
-    test_group.add_argument("--integration", action="store_true", help="Run mocked scenario tests")
-    test_group.add_argument("--real-integration", action="store_true", help="Run real integration tests (requires API token)")
-    test_group.add_argument("--performance", action="store_true", help="Run performance tests only")
-    test_group.add_argument("--stress", action="store_true", help="Run stress tests only")
-    test_group.add_argument("--benchmark", action="store_true", help="Run benchmark tests")
+    test_group.add_argument(
+        "--integration", action="store_true", help="Run mocked scenario tests"
+    )
+    test_group.add_argument(
+        "--real-integration",
+        action="store_true",
+        help="Run real integration tests (requires API token)",
+    )
+    test_group.add_argument(
+        "--performance", action="store_true", help="Run performance tests only"
+    )
+    test_group.add_argument(
+        "--stress", action="store_true", help="Run stress tests only"
+    )
+    test_group.add_argument(
+        "--benchmark", action="store_true", help="Run benchmark tests"
+    )
 
     # Additional options
-    parser.add_argument("--coverage", action="store_true", help="Run tests with coverage")
+    parser.add_argument(
+        "--coverage", action="store_true", help="Run tests with coverage"
+    )
     parser.add_argument("--parallel", action="store_true", help="Run tests in parallel")
     parser.add_argument("--lint", action="store_true", help="Run code quality checks")
-    parser.add_argument("--report", action="store_true", help="Generate comprehensive test report")
-    parser.add_argument("--check-deps", action="store_true", help="Check test dependencies")
+    parser.add_argument(
+        "--report", action="store_true", help="Generate comprehensive test report"
+    )
+    parser.add_argument(
+        "--check-deps", action="store_true", help="Check test dependencies"
+    )
     parser.add_argument("--quick", action="store_true", help="Run quick smoke tests")
-    parser.add_argument("--token", type=str, help="API token for real integration tests")
+    parser.add_argument(
+        "--token", type=str, help="API token for real integration tests"
+    )
 
     args = parser.parse_args()
 
@@ -251,9 +306,22 @@ Examples:
         return 1 if not check_test_dependencies() else 0
 
     # Default to all tests if no specific option is given
-    if not any([args.all, args.unit, args.integration, args.real_integration, args.performance,
-               args.stress, args.benchmark, args.coverage, args.parallel,
-               args.lint, args.report, args.quick]):
+    if not any(
+        [
+            args.all,
+            args.unit,
+            args.integration,
+            args.real_integration,
+            args.performance,
+            args.stress,
+            args.benchmark,
+            args.coverage,
+            args.parallel,
+            args.lint,
+            args.report,
+            args.quick,
+        ]
+    ):
         args.all = True
 
     success = True
@@ -261,10 +329,20 @@ Examples:
     # Run selected tests
     if args.quick:
         # Quick smoke test - just run a few basic tests
-        cmd = ["python", "-c", "from lib.hyperate import HypeRate, Device; print('Import successful')"]
+        cmd = [
+            "python",
+            "-c",
+            "from lib.hyperate import HypeRate, Device; print('Import successful')",
+        ]
         success &= run_command(cmd, "Quick Import Test")
 
-        cmd = ["python", "-m", "pytest", "Tests/test_hyperate.py::TestHypeRateInitialization", "-v"]
+        cmd = [
+            "python",
+            "-m",
+            "pytest",
+            "Tests/test_hyperate.py::TestHypeRateInitialization",
+            "-v",
+        ]
         success &= run_command(cmd, "Quick Unit Test")
 
     elif args.unit:
@@ -303,7 +381,9 @@ Examples:
         success &= run_linting()
         success &= run_unit_tests()
         success &= run_integration_tests()
-        success &= run_real_integration_tests(args.token)  # Pass token for real integration tests
+        success &= run_real_integration_tests(
+            args.token
+        )  # Pass token for real integration tests
         success &= run_performance_tests()
         success &= run_tests_with_coverage()
 

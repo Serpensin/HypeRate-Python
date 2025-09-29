@@ -1,0 +1,104 @@
+name: ?? Documentation Issue
+description: Report an issue with documentation or suggest improvements
+title: "[DOCS] "
+labels: ["documentation", "needs-triage"]
+assignees:
+  - Serpensin
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation! Please provide details about the issue or improvement.
+
+  - type: dropdown
+    id: documentation-type
+    attributes:
+      label: ?? Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - README.md
+        - API Documentation
+        - Code Comments
+        - Examples
+        - Installation Instructions
+        - Contributing Guidelines
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: ?? Issue Type
+      description: What kind of documentation issue is this?
+      options:
+        - Missing information
+        - Incorrect information
+        - Unclear/confusing content
+        - Outdated content
+        - Typo/grammar error
+        - Missing examples
+        - Broken links
+        - Formatting issues
+        - Suggestion for improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: ?? Current Content
+      description: What is the current documentation content that needs to be changed?
+      placeholder: Copy and paste the current content here, or describe where it's located...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: ? Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: Describe your suggested changes or improvements...
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: ?? Location
+      description: Where is this documentation located?
+      placeholder: "e.g., README.md line 45, docs/api.md, function docstring in hyperate/client.py"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: ?? Context
+      description: Why is this documentation improvement needed? How will it help users?
+      placeholder: This will help users understand...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: ?? Proposed Examples
+      description: If suggesting new examples, please provide them here.
+      render: python
+      placeholder: |
+        # Example code that should be added to documentation
+        import hyperate
+        
+        # Your example here
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ? Checklist
+      description: Please confirm you have completed the following
+      options:
+        - label: I have checked that this documentation issue doesn't already exist
+          required: true
+        - label: I have identified the specific location of the documentation issue
+          required: true
+        - label: I have provided clear suggestions for improvement
+          required: true

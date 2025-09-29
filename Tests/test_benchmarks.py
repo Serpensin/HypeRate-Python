@@ -5,15 +5,15 @@ Pytest-benchmark compatible performance tests for the HypeRate library.
 These tests are specifically designed to work with pytest-benchmark and
 provide detailed performance measurements.
 """
+import asyncio
+import gc
 import json
 import time
-import gc
-from unittest.mock import Mock, patch, AsyncMock
-import asyncio
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from lib.hyperate import HypeRate, Device
+from lib.hyperate import Device, HypeRate
 
 
 class TestBenchmarks:
@@ -33,10 +33,11 @@ class TestBenchmarks:
 
     def test_event_registration_benchmark(self, benchmark):
         """Benchmark event handler registration."""
+
         def register_1000_handlers():
             handlers = [Mock() for _ in range(1000)]
             for i, handler in enumerate(handlers):
-                event_type = ['heartbeat', 'clip', 'connected', 'disconnected'][i % 4]
+                event_type = ["heartbeat", "clip", "connected", "disconnected"][i % 4]
                 self.client.on(event_type, handler)
             return len(handlers)
 
@@ -48,10 +49,11 @@ class TestBenchmarks:
         # Setup
         messages = []
         for i in range(1000):
-            messages.append(json.dumps({
-                "topic": f"hr:device{i % 100}",
-                "payload": {"hr": 70 + (i % 30)}
-            }))
+            messages.append(
+                json.dumps(
+                    {"topic": f"hr:device{i % 100}", "payload": {"hr": 70 + (i % 30)}}
+                )
+            )
 
         processed_count = 0
 
@@ -59,7 +61,7 @@ class TestBenchmarks:
             nonlocal processed_count
             processed_count += 1
 
-        self.client.on('heartbeat', count_handler)
+        self.client.on("heartbeat", count_handler)
 
         def process_all_messages():
             nonlocal processed_count
@@ -78,14 +80,14 @@ class TestBenchmarks:
         handlers = [Mock() for _ in range(handler_count)]
 
         for handler in handlers:
-            self.client.on('heartbeat', handler)
+            self.client.on("heartbeat", handler)
 
         test_payload = {"hr": 75}
 
         def fire_100_events():
             iterations = 100
             for _ in range(iterations):
-                self.client._fire_event('heartbeat', test_payload)
+                self.client._fire_event("heartbeat", test_payload)
             return iterations
 
         result = benchmark(fire_100_events)
@@ -105,10 +107,10 @@ class TestBenchmarks:
             return [Device.is_valid_device_id(device_id) for device_id in all_ids]
 
         results = benchmark(validate_all_devices)
-        
+
         valid_count = sum(results[:500])
         invalid_count = sum(results[500:])
-        
+
         assert valid_count == 500
         assert invalid_count == 0
 
@@ -132,31 +134,35 @@ class TestBenchmarks:
 
     def test_memory_usage_benchmark(self, benchmark):
         """Benchmark memory usage under load."""
+
         def memory_load_operation():
             initial_size = len(self.client._event_handlers)
-            
+
             # Create handlers
             handlers = []
             for i in range(100):
                 handler = Mock()
                 handlers.append(handler)
-                self.client.on('heartbeat', handler)
+                self.client.on("heartbeat", handler)
 
             # Process messages
             for i in range(200):
-                message = json.dumps({
-                    "topic": f"hr:device{i % 50}",
-                    "payload": {"hr": 70 + (i % 30)}
-                })
+                message = json.dumps(
+                    {"topic": f"hr:device{i % 50}", "payload": {"hr": 70 + (i % 30)}}
+                )
                 self.client._handle_message(message)
 
-            final_size = sum(len(handlers) for handlers in self.client._event_handlers.values())
-            
+            final_size = sum(
+                len(handlers) for handlers in self.client._event_handlers.values()
+            )
+
             # Clean up
-            self.client._event_handlers = {key: [] for key in self.client._event_handlers}
+            self.client._event_handlers = {
+                key: [] for key in self.client._event_handlers
+            }
             handlers.clear()
             gc.collect()
-            
+
             return final_size - initial_size
 
         result = benchmark(memory_load_operation)
@@ -175,7 +181,7 @@ class TestBenchmarks:
                     "topic": f"hr:device{i % 10}",
                     "event": "phx_join",
                     "payload": {"data": f"test_{i}"},
-                    "ref": i
+                    "ref": i,
                 }
                 # Simulate packet creation and serialization
                 json.dumps(packet)
@@ -185,5 +191,5 @@ class TestBenchmarks:
         assert result == 100
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '--benchmark-only', '--benchmark-sort=mean', '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "--benchmark-only", "--benchmark-sort=mean", "-v"])

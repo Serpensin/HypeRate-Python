@@ -1,5 +1,7 @@
 import asyncio
+
 import hyperate
+
 
 async def get_valid_api_key():
     while True:
@@ -14,12 +16,14 @@ async def get_valid_api_key():
         except Exception:
             print("Connection failed. Please try again.")
 
+
 async def main():
     hr = await get_valid_api_key()
 
     def on_heartbeat(data):
-        print("Heartbeat received:", data['hr'])
-    hr.on('heartbeat', on_heartbeat)
+        print("Heartbeat received:", data["hr"])
+
+    hr.on("heartbeat", on_heartbeat)
 
     await hr.join_heartbeat_channel("internal-testing")
 
@@ -30,6 +34,7 @@ async def main():
         print("Exiting...")
 
     await hr.disconnect()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

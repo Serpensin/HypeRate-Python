@@ -6,7 +6,7 @@ and clip data service via WebSocket.
 """
 
 # __init__.py for hyperate package
-from .hyperate import HypeRate, Device
+from .hyperate import Device, HypeRate
 
 __version__ = "1.0.0"
-__all__ = ['HypeRate', 'Device']
+__all__ = ["HypeRate", "Device"]

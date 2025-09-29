@@ -4,21 +4,22 @@ Performance benchmarks and stress tests for the HypeRate library.
 These tests measure performance characteristics and test the library
 under stress conditions to ensure it can handle high-load scenarios.
 """
+
 import asyncio
-import json
-import time
-import unittest
 import gc
+import json
+import statistics
 import sys
 import threading
+import time
+import unittest
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import Mock, patch, AsyncMock
-from typing import List, Dict, Any
-import statistics
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from lib.hyperate import HypeRate, Device
+from lib.hyperate import Device, HypeRate
 
 # Import token management from conftest
 try:
@@ -51,10 +52,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
 
     def test_event_registration_performance(self, benchmark=None):
         """Benchmark event handler registration performance."""
+
         def register_handlers():
             handlers = [Mock() for _ in range(1000)]
             for i, handler in enumerate(handlers):
-                event_type = ['heartbeat', 'clip', 'connected', 'disconnected'][i % 4]
+                event_type = ["heartbeat", "clip", "connected", "disconnected"][i % 4]
                 self.client.on(event_type, handler)
             return len(handlers)
 
@@ -68,7 +70,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             start_time = time.perf_counter()
 
             for i, handler in enumerate(handlers):
-                event_type = ['heartbeat', 'clip', 'connected', 'disconnected'][i % 4]
+                event_type = ["heartbeat", "clip", "connected", "disconnected"][i % 4]
                 self.client.on(event_type, handler)
 
             end_time = time.perf_counter()
@@ -81,11 +83,15 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             registrations_per_second = len(handlers) / registration_time
 
             print(f"\nEvent Registration Performance:")
-            print(f"  Registered {len(handlers)} handlers in {registration_time:.4f} seconds")
+            print(
+                f"  Registered {len(handlers)} handlers in {registration_time:.4f} seconds"
+            )
             print(f"  Rate: {registrations_per_second:.0f} registrations/second")
 
             # Verify all handlers were registered
-            total_handlers = sum(len(handlers) for handlers in self.client._event_handlers.values())
+            total_handlers = sum(
+                len(handlers) for handlers in self.client._event_handlers.values()
+            )
             self.assertEqual(total_handlers, 1000)
 
     def test_message_processing_performance(self, benchmark=None):
@@ -93,10 +99,11 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         # Create test messages
         messages = []
         for i in range(1000):
-            messages.append(json.dumps({
-                "topic": f"hr:device{i % 100}",
-                "payload": {"hr": 70 + (i % 30)}
-            }))
+            messages.append(
+                json.dumps(
+                    {"topic": f"hr:device{i % 100}", "payload": {"hr": 70 + (i % 30)}}
+                )
+            )
 
         processed_count = 0
 
@@ -104,7 +111,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             nonlocal processed_count
             processed_count += 1
 
-        self.client.on('heartbeat', count_handler)
+        self.client.on("heartbeat", count_handler)
 
         def process_messages():
             nonlocal processed_count
@@ -127,7 +134,9 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             messages_per_second = len(messages) / processing_time
 
             print(f"\nMessage Processing Performance:")
-            print(f"  Processed {len(messages)} messages in {processing_time:.4f} seconds")
+            print(
+                f"  Processed {len(messages)} messages in {processing_time:.4f} seconds"
+            )
             print(f"  Rate: {messages_per_second:.0f} messages/second")
             print(f"  Verified {result} events fired")
 
@@ -139,14 +148,14 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         handlers = [Mock() for _ in range(handler_count)]
 
         for handler in handlers:
-            self.client.on('heartbeat', handler)
+            self.client.on("heartbeat", handler)
 
         test_payload = {"hr": 75}
 
         def fire_events():
             iterations = 100  # Reduced for benchmark
             for _ in range(iterations):
-                self.client._fire_event('heartbeat', test_payload)
+                self.client._fire_event("heartbeat", test_payload)
             return iterations
 
         if benchmark:
@@ -161,7 +170,7 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             start_time = time.perf_counter()
 
             for _ in range(iterations):
-                self.client._fire_event('heartbeat', test_payload)
+                self.client._fire_event("heartbeat", test_payload)
 
             end_time = time.perf_counter()
             firing_time = end_time - start_time
@@ -204,7 +213,9 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             validations_per_second = len(all_ids) / validation_time
 
             print(f"\nDevice Validation Performance:")
-            print(f"  Validated {len(all_ids)} device IDs in {validation_time:.4f} seconds")
+            print(
+                f"  Validated {len(all_ids)} device IDs in {validation_time:.4f} seconds"
+            )
             print(f"  Rate: {validations_per_second:.0f} validations/second")
 
             valid_count = sum(validation_results[:1000])
@@ -241,10 +252,14 @@ class TestPerformanceBenchmarks(unittest.TestCase):
             extractions_per_second = len(test_inputs) / extraction_time
 
             print(f"\nDevice Extraction Performance:")
-            print(f"  Extracted from {len(test_inputs)} inputs in {extraction_time:.4f} seconds")
+            print(
+                f"  Extracted from {len(test_inputs)} inputs in {extraction_time:.4f} seconds"
+            )
             print(f"  Rate: {extractions_per_second:.0f} extractions/second")
 
-            successful_extractions = sum(1 for result in extraction_results if result is not None)
+            successful_extractions = sum(
+                1 for result in extraction_results if result is not None
+            )
             self.assertEqual(successful_extractions, len(test_inputs))
 
 
@@ -258,7 +273,7 @@ class TestStressTests(unittest.TestCase):
         api_token = get_api_token() or "test_token"
         self.client = HypeRate(api_token)
         # Store original logger disabled state to restore later
-        self.original_logger_disabled = getattr(self.client.logger, 'disabled', False)
+        self.original_logger_disabled = getattr(self.client.logger, "disabled", False)
         # Disable all logging for stress tests
         self.client.logger.disabled = True
 
@@ -269,6 +284,7 @@ class TestStressTests(unittest.TestCase):
 
     def test_memory_usage_under_load(self, benchmark=None):
         """Test memory usage under sustained load."""
+
         def memory_load_test():
             initial_memory = self._get_memory_usage()
 
@@ -277,14 +293,13 @@ class TestStressTests(unittest.TestCase):
             for i in range(50):  # Reduced for benchmark
                 handler = Mock()
                 handlers.append(handler)
-                self.client.on('heartbeat', handler)
+                self.client.on("heartbeat", handler)
 
             # Process messages
             for i in range(500):  # Reduced for benchmark
-                message = json.dumps({
-                    "topic": f"hr:device{i % 100}",
-                    "payload": {"hr": 70 + (i % 30)}
-                })
+                message = json.dumps(
+                    {"topic": f"hr:device{i % 100}", "payload": {"hr": 70 + (i % 30)}}
+                )
                 self.client._handle_message(message)
 
                 if i % 100 == 0:
@@ -296,7 +311,9 @@ class TestStressTests(unittest.TestCase):
 
             # Clean up
             handlers.clear()
-            self.client._event_handlers = {key: [] for key in self.client._event_handlers}
+            self.client._event_handlers = {
+                key: [] for key in self.client._event_handlers
+            }
             gc.collect()
 
             return memory_growth
@@ -312,13 +329,12 @@ class TestStressTests(unittest.TestCase):
             for i in range(100):
                 handler = Mock()
                 handlers.append(handler)
-                self.client.on('heartbeat', handler)
+                self.client.on("heartbeat", handler)
 
             for i in range(1000):
-                message = json.dumps({
-                    "topic": f"hr:device{i % 100}",
-                    "payload": {"hr": 70 + (i % 30)}
-                })
+                message = json.dumps(
+                    {"topic": f"hr:device{i % 100}", "payload": {"hr": 70 + (i % 30)}}
+                )
                 self.client._handle_message(message)
 
                 if i % 100 == 0:
@@ -337,7 +353,9 @@ class TestStressTests(unittest.TestCase):
             self.assertLess(memory_growth, 100.0)
 
             handlers.clear()
-            self.client._event_handlers = {key: [] for key in self.client._event_handlers}
+            self.client._event_handlers = {
+                key: [] for key in self.client._event_handlers
+            }
             gc.collect()
 
     def test_concurrent_access_stress(self):
@@ -350,10 +368,12 @@ class TestStressTests(unittest.TestCase):
             try:
                 # Each thread processes messages
                 for i in range(message_count):
-                    message = json.dumps({
-                        "topic": f"hr:thread{thread_id}",
-                        "payload": {"hr": 70 + (i % 30), "thread": thread_id}
-                    })
+                    message = json.dumps(
+                        {
+                            "topic": f"hr:thread{thread_id}",
+                            "payload": {"hr": 70 + (i % 30), "thread": thread_id},
+                        }
+                    )
 
                     self.client._handle_message(message)
 
@@ -370,7 +390,7 @@ class TestStressTests(unittest.TestCase):
             with lock:
                 results["events_fired"] += 1
 
-        self.client.on('heartbeat', track_events)
+        self.client.on("heartbeat", track_events)
 
         # Run concurrent threads
         thread_count = 10
@@ -417,18 +437,17 @@ class TestStressTests(unittest.TestCase):
             self.assertIn("hr", payload)
             self.assertIn("large_data", payload)
 
-        self.client.on('heartbeat', large_payload_handler)
+        self.client.on("heartbeat", large_payload_handler)
 
         for size in payload_sizes:
             # Create large payload
             large_data = "x" * size
-            message = json.dumps({
-                "topic": "hr:stress_test",
-                "payload": {
-                    "hr": 75,
-                    "large_data": large_data
+            message = json.dumps(
+                {
+                    "topic": "hr:stress_test",
+                    "payload": {"hr": 75, "large_data": large_data},
                 }
-            })
+            )
 
             # Measure processing time
             start_time = time.perf_counter()
@@ -438,7 +457,9 @@ class TestStressTests(unittest.TestCase):
             processing_time = end_time - start_time
             processing_times.append(processing_time)
 
-            print(f"Payload size: {size:7d} bytes, Processing time: {processing_time:.6f} seconds")
+            print(
+                f"Payload size: {size:7d} bytes, Processing time: {processing_time:.6f} seconds"
+            )
 
         print(f"\nLarge Payload Stress Test:")
         print(f"  Tested payload sizes: {payload_sizes}")
@@ -477,20 +498,22 @@ class TestStressTests(unittest.TestCase):
                 raise
 
         # Register all handlers
-        self.client.on('heartbeat', failing_handler_25)
-        self.client.on('heartbeat', failing_handler_50)
-        self.client.on('heartbeat', successful_handler)
-        self.client.on('heartbeat', exception_counting_handler)
+        self.client.on("heartbeat", failing_handler_25)
+        self.client.on("heartbeat", failing_handler_50)
+        self.client.on("heartbeat", successful_handler)
+        self.client.on("heartbeat", exception_counting_handler)
 
         # Process many messages
         message_count = 10000
         start_time = time.perf_counter()
 
         for i in range(message_count):
-            message = json.dumps({
-                "topic": "hr:exception_test",
-                "payload": {"hr": 70 + (i % 30), "iteration": i}
-            })
+            message = json.dumps(
+                {
+                    "topic": "hr:exception_test",
+                    "payload": {"hr": 70 + (i % 30), "iteration": i},
+                }
+            )
 
             self.client._handle_message(message)
 
@@ -511,11 +534,13 @@ class TestStressTests(unittest.TestCase):
         """Get current memory usage in MB."""
         try:
             import psutil
+
             process = psutil.Process()
             return process.memory_info().rss / 1024 / 1024  # Convert to MB
         except ImportError:
             # Fallback if psutil is not available - estimate based on object sizes
             import sys
+
             total_size = 0
             total_size += sys.getsizeof(self.client)
             total_size += sys.getsizeof(self.client._event_handlers)
@@ -535,6 +560,7 @@ class TestAsyncPerformance(unittest.IsolatedAsyncioTestCase):
         client = HypeRate(api_token)
 
         mock_ws = AsyncMock()
+
         async def empty_iterator():
             return
             yield
@@ -544,8 +570,9 @@ class TestAsyncPerformance(unittest.IsolatedAsyncioTestCase):
 
         async def connection_cycle():
             cycle_count = 10  # Reduced for benchmark
-            
-            with patch('websockets.connect') as mock_connect:
+
+            with patch("websockets.connect") as mock_connect:
+
                 async def mock_connect_func(*args, **kwargs):
                     return mock_ws
 
@@ -556,7 +583,7 @@ class TestAsyncPerformance(unittest.IsolatedAsyncioTestCase):
                     await asyncio.sleep(0.001)
                     await client.disconnect()
                     await asyncio.sleep(0.001)
-            
+
             return cycle_count
 
         if benchmark:
@@ -565,22 +592,23 @@ class TestAsyncPerformance(unittest.IsolatedAsyncioTestCase):
             start_time = time.perf_counter()
             result = await connection_cycle()
             end_time = time.perf_counter()
-            
+
             total_time = end_time - start_time
             cycles_per_second = result / total_time
-            
+
             print(f"\nAsync Task Performance Test (Benchmark):")
             print(f"  Completed {result} connect/disconnect cycles")
             print(f"  Total time: {total_time:.4f} seconds")
             print(f"  Rate: {cycles_per_second:.1f} cycles/second")
-            
+
             self.assertGreater(cycles_per_second, 1)  # At least 1 cycle per second
         else:
             # Original fallback code
             cycle_count = 100
             start_time = time.perf_counter()
 
-            with patch('websockets.connect') as mock_connect:
+            with patch("websockets.connect") as mock_connect:
+
                 async def mock_connect_func(*args, **kwargs):
                     return mock_ws
 
@@ -595,9 +623,15 @@ class TestAsyncPerformance(unittest.IsolatedAsyncioTestCase):
                     await asyncio.sleep(0.001)
 
                     if client._receive_task:
-                        self.assertTrue(client._receive_task.cancelled() or client._receive_task.done())
+                        self.assertTrue(
+                            client._receive_task.cancelled()
+                            or client._receive_task.done()
+                        )
                     if client._heartbeat_task:
-                        self.assertTrue(client._heartbeat_task.cancelled() or client._heartbeat_task.done())
+                        self.assertTrue(
+                            client._heartbeat_task.cancelled()
+                            or client._heartbeat_task.done()
+                        )
 
             end_time = time.perf_counter()
             total_time = end_time - start_time
@@ -639,6 +673,6 @@ def run_performance_suite():
     return result.wasSuccessful()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     success = run_performance_suite()
     sys.exit(0 if success else 1)

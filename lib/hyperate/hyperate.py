@@ -4,13 +4,14 @@ HypeRate WebSocket Client Module.
 This module provides a WebSocket client for connecting to the HypeRate API
 to receive real-time heartbeat and clip data.
 """
+
 import asyncio
 import json
 import logging
 import re
 import sys
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 
 import websockets
 
@@ -26,11 +27,7 @@ if sys.version_info < (3, 8):
 WebSocketConnection = Any  # websockets.WebSocketClientProtocol or similar
 
 # Type alias for regex pattern - compatible with Python 3.8+
-if sys.version_info >= (3, 8):
-    from typing import Pattern
-    RegexPattern = Pattern[str]
-else:
-    RegexPattern = type(re.compile(''))
+RegexPattern = Pattern[str]
 
 
 # pylint: disable=too-many-instance-attributes
@@ -51,31 +48,34 @@ class HypeRate:
         logger (logging.Logger): Logger instance for logging messages.
     """
 
-    def __init__(self, api_token: str,
-                 base_url: str = "wss://app.hyperate.io/socket/websocket",
-                 logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self,
+        api_token: str,
+        base_url: str = "wss://app.hyperate.io/socket/websocket",
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
         """
         Initialize the HypeRate client with API token and optional base URL.
 
         Args:
             api_token (str): The API token for authentication with HypeRate service.
             base_url (str, optional): The WebSocket URL for the HypeRate service.
-                                    Defaults to "wss://app.hyperate.io/socket/websocket".
-            logger (logging.Logger, optional): Custom logger instance. If provided, a
-                                             child logger named 'hyperate' will be created
-                                             from it to maintain proper logging hierarchy.
+                Defaults to "wss://app.hyperate.io/socket/websocket".
+            logger (logging.Logger, optional): Custom logger instance. If provided,
+                a child logger named 'hyperate' will be created from it to
+                maintain proper logging hierarchy.
         """
         self.api_token: str = api_token.strip()
         self.base_url: str = base_url
         self.ws: Optional[WebSocketConnection] = None
         self.connected: bool = False
         self._event_handlers: Dict[str, List[Callable[..., None]]] = {
-            'connected': [],
-            'disconnected': [],
-            'heartbeat': [],
-            'clip': [],
-            'channel_joined': [],
-            'channel_left': [],
+            "connected": [],
+            "disconnected": [],
+            "heartbeat": [],
+            "clip": [],
+            "channel_joined": [],
+            "channel_left": [],
         }
         self._receive_task: Optional[asyncio.Task[None]] = None
         self._heartbeat_task: Optional[asyncio.Task[None]] = None
@@ -87,8 +87,11 @@ class HypeRate:
             # No running event loop, create a new one for this thread
             # Suppress deprecation warning for asyncio.get_event_loop()
             with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=DeprecationWarning,
-                                        message="There is no current event loop")
+                warnings.filterwarnings(
+                    "ignore",
+                    category=DeprecationWarning,
+                    message="There is no current event loop",
+                )
                 try:
                     self._loop = asyncio.get_event_loop()
                 except RuntimeError:
@@ -101,7 +104,7 @@ class HypeRate:
             if not self.logger.handlers:
                 handler = logging.StreamHandler()
                 formatter = logging.Formatter(
-                    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
                 )
                 handler.setFormatter(formatter)
                 self.logger.addHandler(handler)
@@ -109,7 +112,9 @@ class HypeRate:
         else:
             self.logger = logger.getChild("hyperate")
 
-        self.logger.debug("HypeRate client initialized with base_url: %s", self.base_url)
+        self.logger.debug(
+            "HypeRate client initialized with base_url: %s", self.base_url
+        )
 
     def on(self, event: str, handler: Callable[..., None]) -> None:
         """
@@ -125,27 +130,31 @@ class HypeRate:
             self._event_handlers[event].append(handler)
             self.logger.debug("Event handler registered for event: %s", event)
         else:
-            self.logger.warning("Attempted to register handler for unknown event: %s", event)
+            self.logger.warning(
+                "Attempted to register handler for unknown event: %s", event
+            )
 
     async def connect(self) -> None:
         """
         Establish a WebSocket connection to the HypeRate service.
 
-        This method connects to the WebSocket endpoint, starts the receive and heartbeat tasks,
-        and fires the 'connected' event.
+        This method connects to the WebSocket endpoint, starts the receive and
+        heartbeat tasks, and fires the 'connected' event.
 
         Raises:
             websockets.exceptions.WebSocketException: If the connection fails.
         """
         try:
             url = f"{self.base_url}?token={self.api_token}"
-            self.logger.info("Attempting to connect to HypeRate WebSocket: %s", self.base_url)
+            self.logger.info(
+                "Attempting to connect to HypeRate WebSocket: %s", self.base_url
+            )
 
             self.ws = await websockets.connect(url)
             self.connected = True
             self.logger.info("Successfully connected to HypeRate WebSocket")
 
-            self._fire_event('connected')
+            self._fire_event("connected")
             self._receive_task = self._loop.create_task(self._receive())
             self._heartbeat_task = self._loop.create_task(self._heartbeat())
 
@@ -171,7 +180,7 @@ class HypeRate:
             self._receive_task.cancel()
             # Await the cancellation to prevent warnings about unawaited coroutines
             # Only if it's an actual asyncio.Task
-            if hasattr(self._receive_task, '__await__'):
+            if hasattr(self._receive_task, "__await__"):
                 try:
                     await self._receive_task
                 except asyncio.CancelledError:
@@ -182,7 +191,7 @@ class HypeRate:
             self._heartbeat_task.cancel()
             # Await the cancellation to prevent warnings about unawaited coroutines
             # Only if it's an actual asyncio.Task
-            if hasattr(self._heartbeat_task, '__await__'):
+            if hasattr(self._heartbeat_task, "__await__"):
                 try:
                     await self._heartbeat_task
                 except asyncio.CancelledError:
@@ -194,7 +203,7 @@ class HypeRate:
             self.logger.debug("WebSocket connection closed")
 
         self.connected = False
-        self._fire_event('disconnected')
+        self._fire_event("disconnected")
         self.logger.info("Successfully disconnected from HypeRate WebSocket")
 
     async def send_packet(self, packet: Dict[str, Any]) -> None:
@@ -210,16 +219,22 @@ class HypeRate:
                 await self.ws.send(json_data)
                 self.logger.debug("Sent packet: %s", packet)
             except websockets.exceptions.WebSocketException as e:
-                self.logger.error("WebSocket error while sending packet %s: %s", packet, e)
+                self.logger.error(
+                    "WebSocket error while sending packet %s: %s", packet, e
+                )
                 raise
             except (json.JSONDecodeError, TypeError) as e:
                 self.logger.error("Failed to encode packet %s as JSON: %s", packet, e)
                 raise
             except Exception as e:
-                self.logger.error("Unexpected error while sending packet %s: %s", packet, e)
+                self.logger.error(
+                    "Unexpected error while sending packet %s: %s", packet, e
+                )
                 raise
         else:
-            self.logger.warning("Attempted to send packet but WebSocket is not connected")
+            self.logger.warning(
+                "Attempted to send packet but WebSocket is not connected"
+            )
 
     async def join_heartbeat_channel(self, device_id: str) -> None:
         """
@@ -269,24 +284,31 @@ class HypeRate:
         """
         Join a specific channel to receive data.
 
-        This method sends a join packet for the specified channel. The 'channel_joined' 
+        This method sends a join packet for the specified channel. The 'channel_joined'
         event will be fired when the server confirms the successful join.
 
         Args:
             channel_name (str): The name of the channel to join.
         """
         try:
-            packet = {"topic": channel_name, "event": "phx_join", "payload": {}, "ref": 1}
+            packet = {
+                "topic": channel_name,
+                "event": "phx_join",
+                "payload": {},
+                "ref": 1,
+            }
             await self.send_packet(packet)
             self.logger.debug("Sent join request for channel: %s", channel_name)
         except websockets.exceptions.WebSocketException as e:
-            self.logger.error("WebSocket error while joining channel %s: %s",
-                              channel_name, e)
+            self.logger.error(
+                "WebSocket error while joining channel %s: %s", channel_name, e
+            )
             raise
         # Keep broad exception catching for robustness in critical networking code
         except Exception as e:  # pylint: disable=broad-exception-caught
-            self.logger.error("Unexpected error while joining channel %s: %s",
-                              channel_name, e)
+            self.logger.error(
+                "Unexpected error while joining channel %s: %s", channel_name, e
+            )
             raise
 
     async def leave_channel(self, channel_name: str) -> None:
@@ -300,17 +322,24 @@ class HypeRate:
             channel_name (str): The name of the channel to leave.
         """
         try:
-            packet = {"topic": channel_name, "event": "phx_leave", "payload": {}, "ref": 2}
+            packet = {
+                "topic": channel_name,
+                "event": "phx_leave",
+                "payload": {},
+                "ref": 2,
+            }
             await self.send_packet(packet)
             self.logger.debug("Sent leave request for channel: %s", channel_name)
         except websockets.exceptions.WebSocketException as e:
-            self.logger.error("WebSocket error while leaving channel %s: %s",
-                              channel_name, e)
+            self.logger.error(
+                "WebSocket error while leaving channel %s: %s", channel_name, e
+            )
             raise
         # Keep broad exception catching for robustness in critical networking code
         except Exception as e:  # pylint: disable=broad-exception-caught
-            self.logger.error("Unexpected error while leaving channel %s: %s",
-                              channel_name, e)
+            self.logger.error(
+                "Unexpected error while leaving channel %s: %s", channel_name, e
+            )
             raise
 
     async def _heartbeat(self) -> None:
@@ -323,8 +352,9 @@ class HypeRate:
         self.logger.debug("Heartbeat task started")
         try:
             while self.connected:
-                await self.send_packet({"topic": "phoenix", "event": "heartbeat",
-                                        "payload": {}, "ref": 0})
+                await self.send_packet(
+                    {"topic": "phoenix", "event": "heartbeat", "payload": {}, "ref": 0}
+                )
                 self.logger.debug("Heartbeat packet sent")
                 await asyncio.sleep(10)
         except asyncio.CancelledError:
@@ -356,16 +386,16 @@ class HypeRate:
         except websockets.exceptions.ConnectionClosed as e:
             self.logger.warning("WebSocket connection closed: %s", e)
             self.connected = False
-            self._fire_event('disconnected')
+            self._fire_event("disconnected")
         except websockets.exceptions.WebSocketException as e:
             self.logger.error("WebSocket error in receive task: %s", e)
             self.connected = False
-            self._fire_event('disconnected')
+            self._fire_event("disconnected")
         # Keep broad exception catching for robustness in critical receive loop
         except Exception as e:  # pylint: disable=broad-exception-caught
             self.logger.error("Unexpected error in receive task: %s", e)
             self.connected = False
-            self._fire_event('disconnected')
+            self._fire_event("disconnected")
         finally:
             self.logger.debug("Receive task ended")
 
@@ -382,7 +412,9 @@ class HypeRate:
         """
         try:
             # Convert bytes to string if necessary
-            message_str = message if isinstance(message, str) else message.decode('utf-8')
+            message_str = (
+                message if isinstance(message, str) else message.decode("utf-8")
+            )
             data = json.loads(message_str)
             topic = data.get("topic", "")
             event = data.get("event", "")
@@ -390,7 +422,9 @@ class HypeRate:
             ref = data.get("ref")
 
             # Log all messages for debugging (but not too verbose in production)
-            self.logger.debug("Received message: topic=%s, event=%s, ref=%s", topic, event, ref)
+            self.logger.debug(
+                "Received message: topic=%s, event=%s, ref=%s", topic, event, ref
+            )
 
             # Handle different message types
             if event == "phx_reply":
@@ -400,7 +434,9 @@ class HypeRate:
             elif topic.startswith("clips:"):
                 self._handle_clip_message(topic, payload)
             else:
-                self.logger.debug("Received message for topic: %s, event: %s", topic, event)
+                self.logger.debug(
+                    "Received message for topic: %s, event: %s", topic, event
+                )
 
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             self.logger.error("Failed to parse message: %s", e)
@@ -408,8 +444,13 @@ class HypeRate:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self.logger.error("Unexpected error handling message: %s", e)
 
-    def _handle_phoenix_reply(self, topic: str, payload: Dict[str, Any],
-                              ref: Optional[int], data: Dict[str, Any]) -> None:
+    def _handle_phoenix_reply(
+        self,
+        topic: str,
+        payload: Dict[str, Any],
+        ref: Optional[int],
+        data: Dict[str, Any],
+    ) -> None:
         """
         Handle Phoenix WebSocket reply messages (channel join/leave confirmations).
 
@@ -426,15 +467,17 @@ class HypeRate:
             if ref == 1:  # Join confirmation (we use ref=1 for joins)
                 self.logger.info("Channel join confirmed for topic: %s", topic)
                 device_id = self._extract_device_id_from_topic(topic)
-                self._fire_event('channel_joined', device_id)
+                self._fire_event("channel_joined", device_id)
             elif ref == 2:  # Leave confirmation (we use ref=2 for leaves)
                 self.logger.info("Channel leave confirmed for topic: %s", topic)
                 device_id = self._extract_device_id_from_topic(topic)
-                self._fire_event('channel_left', device_id)
+                self._fire_event("channel_left", device_id)
             else:
                 self.logger.debug("Phoenix reply with status 'ok': %s", data)
         elif status == "error":
-            self.logger.error("Channel operation failed for topic %s: %s", topic, response)
+            self.logger.error(
+                "Channel operation failed for topic %s: %s", topic, response
+            )
         else:
             self.logger.debug("Phoenix reply with status '%s': %s", status, data)
 
@@ -465,7 +508,7 @@ class HypeRate:
         hr = payload.get("hr")
         if hr is not None:
             self.logger.debug("Heartbeat data received for topic %s: HR=%s", topic, hr)
-            self._fire_event('heartbeat', payload)
+            self._fire_event("heartbeat", payload)
 
     def _handle_clip_message(self, topic: str, payload: Dict[str, Any]) -> None:
         """
@@ -478,7 +521,7 @@ class HypeRate:
         slug = payload.get("twitch_slug")
         if slug:
             self.logger.debug("Clip data received for topic %s: slug=%s", topic, slug)
-            self._fire_event('clip', payload)
+            self._fire_event("clip", payload)
 
     def _fire_event(self, event: str, *args: Any) -> None:
         """
@@ -493,11 +536,14 @@ class HypeRate:
         """
         handlers = self._event_handlers.get(event, [])
         if handlers:
-            self.logger.debug("Firing event '%s' to %d handler(s)", event, len(handlers))
+            self.logger.debug(
+                "Firing event '%s' to %d handler(s)", event, len(handlers)
+            )
             for handler in handlers:
                 try:
                     handler(*args)
-                # Keep broad exception catching to prevent one bad handler from breaking others
+                # Keep broad exception catching to prevent one bad handler
+                # from breaking others
                 except Exception as e:  # pylint: disable=broad-exception-caught
                     self.logger.error("Error in event handler for '%s': %s", event, e)
         else:
@@ -509,7 +555,7 @@ class Device:
     Utility class for validating and extracting device IDs used in the HypeRate system.
     """
 
-    VALID_ID_REGEX: RegexPattern = re.compile(r'^[a-zA-Z0-9]{3,8}$')
+    VALID_ID_REGEX: RegexPattern = re.compile(r"^[a-zA-Z0-9]{3,8}$")
 
     @staticmethod
     def is_valid_device_id(device_id: str) -> bool:
@@ -520,7 +566,8 @@ class Device:
             device_id (str): The device ID to validate.
 
         Returns:
-            bool: True if the device ID is valid or is 'internal-testing', False otherwise.
+            bool: True if the device ID is valid or is 'internal-testing',
+                False otherwise.
         """
         if device_id == "internal-testing":
             return True
@@ -538,13 +585,13 @@ class Device:
             Optional[str]: The extracted device ID if found, otherwise None.
         """
         # First, try to match the HypeRate URL pattern
-        hyperate_pattern = r'(?:https?://)?app\.hyperate\.io/([a-zA-Z0-9\-]+)(?:\?.*)?'
+        hyperate_pattern = r"(?:https?://)?app\.hyperate\.io/([a-zA-Z0-9\-]+)(?:\?.*)?"
         match = re.search(hyperate_pattern, input_str)
         if match:
             return match.group(1)
 
         # If no URL match, check if the input itself is a valid device ID
-        if re.match(r'^[a-zA-Z0-9\-]+$', input_str):
+        if re.match(r"^[a-zA-Z0-9\-]+$", input_str):
             return input_str
 
         return None

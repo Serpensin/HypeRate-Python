@@ -1,0 +1,102 @@
+name: ? Question
+description: Ask a question about the HypeRate Python library
+title: "[QUESTION] "
+labels: ["question", "needs-triage"]
+assignees:
+  - Serpensin
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question! Please provide as much context as possible to help us give you a helpful answer.
+        
+        **Note:** For general discussions and community help, consider using [GitHub Discussions](https://github.com/Serpensin/HypeRate-Python/discussions) instead.
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: ?? Question Type
+      description: What type of question is this?
+      options:
+        - How to use a specific feature
+        - Best practices
+        - Troubleshooting
+        - Installation help
+        - API usage
+        - Performance question
+        - Integration with other libraries
+        - General usage question
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ? Your Question
+      description: What would you like to know?
+      placeholder: Please describe your question in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: ?? Context
+      description: What are you trying to achieve? What's your use case?
+      placeholder: I'm trying to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-code
+    attributes:
+      label: ?? Current Code
+      description: If applicable, show what you've tried so far.
+      render: python
+      placeholder: |
+        import hyperate
+        
+        # Your current code here
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: ?? What You've Tried
+      description: What have you already tried? What resources have you checked?
+      placeholder: I've tried... I've looked at...
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: ?? Experience Level
+      description: How familiar are you with Python and the HypeRate API?
+      options:
+        - Beginner - New to Python or HypeRate
+        - Intermediate - Some experience with Python/APIs
+        - Advanced - Experienced with Python and APIs
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: ??? Environment
+      description: Please provide relevant environment details.
+      placeholder: |
+        - OS: [e.g. Windows 10, macOS 12.0, Ubuntu 20.04]
+        - Python Version: [e.g. 3.9.7]
+        - HypeRate Python Version: [e.g. 1.0.0]
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ? Checklist
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: I have checked the README and documentation
+          required: true
+        - label: I have provided sufficient context about my question
+          required: true
