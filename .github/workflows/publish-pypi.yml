@@ -61,7 +61,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const requiredWorkflows = ['Test Suite', 'PyLint Code Quality', 'Mypy Type Checking'];
+            const requiredWorkflows = ['Test Suite', 'Code Quality'];
             const maxWaitTime = 30 * 60 * 1000; // 30 minutes
             const pollInterval = 30 * 1000; // 30 seconds
             const startTime = Date.now();

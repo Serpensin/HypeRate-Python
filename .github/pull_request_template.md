@@ -6,24 +6,24 @@ labels: []
 assignees: []
 ---
 
-## ?? Description
+## :memo: Description
 <!-- Provide a brief description of what this PR does -->
 
-## ?? Related Issue
+## :link: Related Issue
 <!-- Link to the issue this PR addresses -->
 Fixes #(issue_number)
 
-## ?? Type of Change
+## :wrench: Type of Change
 <!-- Mark the relevant option with an "x" -->
-- [ ] ?? Bug fix (non-breaking change which fixes an issue)
-- [ ] ? New feature (non-breaking change which adds functionality)
-- [ ] ?? Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] ?? Documentation update
-- [ ] ?? Maintenance (refactoring, dependencies, etc.)
-- [ ] ? Performance improvement
-- [ ] ?? Test coverage improvement
+- [ ] :bug: Bug fix (non-breaking change which fixes an issue)
+- [ ] :sparkles: New feature (non-breaking change which adds functionality)
+- [ ] :boom: Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] :books: Documentation update
+- [ ] :hammer: Maintenance (refactoring, dependencies, etc.)
+- [ ] :zap: Performance improvement
+- [ ] :white_check_mark: Test coverage improvement
 
-## ?? How Has This Been Tested?
+## :test_tube: How Has This Been Tested?
 <!-- Describe the tests that you ran to verify your changes -->
 - [ ] Unit tests
 - [ ] Integration tests
@@ -35,16 +35,16 @@ Fixes #(issue_number)
 - Python Version: 
 - HypeRate Python Version: 
 
-## ?? Test Details
+## :microscope: Test Details
 <!-- Provide details about your testing -->
 ```python
 # Example test code or describe test scenarios
 ```
 
-## ?? Screenshots (if applicable)
+## :camera: Screenshots (if applicable)
 <!-- Add screenshots to help explain your changes -->
 
-## ? Checklist
+## :clipboard: Checklist
 <!-- Mark completed items with an "x" -->
 
 ### Code Quality
@@ -77,10 +77,10 @@ Fixes #(issue_number)
 - [ ] I have not introduced any security vulnerabilities
 - [ ] I have not exposed sensitive information in logs or error messages
 
-## ?? Additional Notes
+## :bulb: Additional Notes
 <!-- Add any additional notes, concerns, or context for reviewers -->
 
-## ?? Documentation Links
+## :books: Documentation Links
 <!-- Link to any relevant documentation -->
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
