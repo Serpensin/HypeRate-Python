@@ -1,9 +1,7 @@
 ---
-name: Pull Request
-about: Submit a pull request to contribute to HypeRate Python
-title: ''
-labels: []
-assignees: []
+name: "Pull Request"
+about: "Use this template for new features"
+title: '[FEATURE/BUG/FIX/DOCS] '
 ---
 
 ## :memo: Description
