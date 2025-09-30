@@ -1,9 +1,3 @@
----
-name: "Pull Request"
-about: "Use this template for new features"
-title: '[FEATURE/BUG/FIX/DOCS] '
----
-
 ## :memo: Description
 <!-- Provide a brief description of what this PR does -->
 
