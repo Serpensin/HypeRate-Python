@@ -3,7 +3,7 @@
 [![Code Quality](https://github.com/Serpensin/HypeRate-Python/workflows/Code%20Quality/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/code-quality.yml)
 [![Test Suite](https://github.com/Serpensin/HypeRate-Python/workflows/Test%20Suite/badge.svg)](https://github.com/Serpensin/HypeRate-Python/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/Serpensin/HypeRate-Python/branch/master/graph/badge.svg)](https://codecov.io/gh/Serpensin/HypeRate-Python)\
-[![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/Serpensin/HypeRate-Python)
+[![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue)](https://github.com/Serpensin/HypeRate-Python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/hyperate.svg)](https://badge.fury.io/py/hyperate)
 
@@ -28,6 +28,7 @@ This library supports and is tested on:
 - Python 3.11
 - Python 3.12
 - Python 3.13
+- Python 3.14
 
 ## Installation
 
