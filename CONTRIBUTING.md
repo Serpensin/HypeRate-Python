@@ -286,7 +286,7 @@ Our CI pipeline runs the following checks on every push and pull request:
 - **Tests**: Must pass with 85%+ coverage
 
 ### Test Matrix
-Tests run on Python versions: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
+Tests run on Python versions: 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14
 
 ### Workflows
 - **Code Quality** (`.github/workflows/code-quality.yml`) - PyLint, Mypy, and Flake8 checks
